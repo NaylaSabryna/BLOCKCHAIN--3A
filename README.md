@@ -4,10 +4,10 @@
 Sistem pemilu tradisional sering dicurigai karena adanya risiko pengubahan data suara secara sepihak. Pada sistem ini:
 
 Suara = Blok Data: Setiap suara yang masuk dibungkus dalam sebuah blok data yang berisi id pemilih, pilihan kandidat, lokasi, dan aktor pencatat.  
-PDF
+
 
 Permanen & Transparan: Begitu suara berhasil dicatat ke dalam blok, data tersebut tidak bisa dihapus atau diubah lagi.  
-PDF
+
 
 # 2. Bedah Struktur Kode (Garis Besar Logika)
 block.py — Pembuat Cetakan Blok
