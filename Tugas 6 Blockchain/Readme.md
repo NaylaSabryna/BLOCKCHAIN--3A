@@ -1,53 +1,63 @@
-# Sistem E-Voting Blockchain berbasis Smart Contract & Tokenisasi (ERC-721)
-
-Proyek ini merupakan implementasi *smart contract* E-Voting Jaringan Tertutup yang dikembangkan menggunakan bahasa pemrograman **Solidity (v0.8.20)**. Sistem ini mengintegrasikan fungsi pencatatan blok suara terenkripsi dengan standar token **ERC-721 (NFT)** dari OpenZeppelin sebagai sertifikat digital bukti kepemilikan kotak suara/batch TPS secara *on-chain*.
+Untuk mengisi kotak-kotak input (*form deployment* dan parameter fungsi) pada **Deployed Contract** dari smart contract `EVotingBlockchain` di atas (misalnya melalui Remix IDE), berikut adalah panduan lengkap berdasarkan tipe data dan alur fungsi yang tersedia:
 
 ---
 
-## 🏗️ Fitur Utama
+### 1. Saat Deploy Contract (`constructor`)
 
-- **Pencatatan Blok Suara (*On-Chain*)**: Menyimpan data pemungutan suara, lokasi TPS, ID pemilih, serta pilihan kandidat secara aman.
-- **Integritas Data via Hashing**: Menggunakan algoritma cryptographic hash `keccak256` untuk memastikan setiap blok suara terhubung dan tidak dapat dimanipulasi.
-- **Tokenisasi Batch TPS (ERC-721)**: Menggenerasi NFT otomatis untuk setiap batch suara TPS yang dibuat sebagai bukti digital hak akses/keabsahan panitia.
-- **Verifikasi & Rekapitulasi Bertingkat**: Mendukung alur kerja pemilu mulai dari verifikasi lokal TPS, rekapitulasi bertingkat, hingga penghitungan akhir.
-- **Audit Trail & Logging History**: Mencatat seluruh riwayat perubahan status batch suara yang dapat dilacak secara transparan (*read-only*).
+Ketika Anda menekan tombol **Deploy** di Remix, kontrak ini **tidak memerlukan parameter tambahan** pada constructor karena nilai `name` dan `symbol` NFT sudah di-hardcode di dalam kontrak (`"EVotingBatchToken", "EVOTE"`).
+
+* **Kotak Parameter Constructor:** Kosongkan atau abaikan, langsung klik **Deploy**.
 
 ---
 
-## 🛠️ Prasyarat & Teknologi
+### 2. Fungsi Utama (`buatBatchSuara`)
 
-- **Solidity Compiler**: `^0.8.20`
-- **Pustaka OpenZeppelin**: `@openzeppelin/contracts` (Modul ERC721 & ERC721URIStorage)
-- **Lingkungan Pengujian**: [Remix IDE](https://remix.ethereum.org/)
+Fungsi ini digunakan oleh panitia (`contractOwner`) untuk membuat batch suara sekaligus melakukan *minting* NFT. Fungsi ini menerima **6 parameter** berurutan:
 
----
-
-## 🚀 Panduan Penggunaan di Remix IDE
-
-### 1. Kompilasi Kontrak (*Compile*)
-1. Buka [Remix IDE](https://remix.ethereum.org/).
-2. Buat file baru bernama `EVotingBlockchain.sol` di dalam folder `contracts/`.
-3. Tempelkan seluruh kode *smart contract* ke dalam file tersebut.
-4. Buka tab **Solidity Compiler** di panel sebelah kiri.
-5. Pilih versi **0.8.20** atau yang lebih baru, lalu klik **Compile EVotingBlockchain.sol**.
-
-### 2. Penyebaran Kontrak (*Deploy*)
-1. Masuk ke tab **Deploy & Run Transactions**.
-2. Pilih **ENVIRONMENT** (misalnya *Remix VM (Cancun)*).
-3. Pilih kontrak `EVotingBlockchain`.
-4. Langsung klik tombol **Deploy** (tanpa mengisi parameter awal).
+| Parameter | Tipe Data | Contoh Nilai / Cara Mengisi | Keterangan |
+| --- | --- | --- | --- |
+| `_batchId` | `string` | `"BATCH-TPS-001"` | ID unik untuk kelompok/batch suara. |
+| `_tpsLocation` | `string` | `"TPS 01 Jakarta Selatan"` | Lokasi Tempat Pemungutan Suara. |
+| `_totalVoters` | `uint256` | `150` | Total jumlah pemilih di TPS tersebut (angka bulat tanpa tanda kutip). |
+| `_voterId` | `string` | `"VOTER-X992"` | ID pemilih atau representasi data pemilih. |
+| `_candidateChoice` | `string` | `"Paslon 01"` | Pilihan kandidat atau suara yang dimasukkan. |
+| `_metadataURI` | `string` | `"ipfs://QmYourMetadataHashHere"` | Link URI metadata NFT (misalnya dari IPFS / JSON metadata). |
 
 ---
 
-## 📑 Panduan Pengisian Parameter Fungsi
+### 3. Fungsi View / Query Riwayat (`getHistory`)
 
-Setelah berhasil di-*deploy*, buka opsi fungsi di panel **Deployed Contracts**:
+Jika Anda ingin melihat riwayat (*history logs*) dari suatu batch suara yang sudah dibuat, fungsi ini memerlukan 1 parameter:
 
-### 1. `buatBatchSuara` (Mencetak Blok Suara & Mint NFT)
-Fungsi ini digunakan oleh panitia untuk membuka kotak suara TPS baru dan mencetak NFT batch.
+| Parameter | Tipe Data | Contoh Nilai / Cara Mengisi |
+| --- | --- | --- |
+| `_batchId` | `string` | `"BATCH-TPS-001"` (harus sama persis dengan yang diinput saat `buatBatchSuara`) |
 
-| Nama Parameter | Tipe Data | Contoh Isian di Remix | Keterangan |
-| :--- | :--- | :--- | :--- |
-| `_batchId` | `string` | `"BATCH-TPS01"` | ID Unik untuk batch suara |
-| `_tpsLocation` | `string` | `"TPS 01 Desa Sukamaju"` | Lokasi atau alamat TPS |
-| `_
+---
+
+### 4. Fungsi Pengecekan Pemilik NFT (`getBatchOwner`)
+
+Untuk mengecek alamat dompet pemilik NFT berdasarkan ID tokennya:
+
+| Parameter | Tipe Data | Contoh Nilai / Cara Mengisi |
+| --- | --- | --- |
+| `_tokenId` | `uint256` | `1` (karena token ID pertama dimulai dari angka `1`, lalu `2`, dst.) |
+
+---
+
+### 5. Fungsi Tanpa Parameter (Eksekusi Langsung)
+
+Fungsi-fungsi berikut **tidak memerlukan input parameter apa pun**, sehingga Anda bisa langsung mengkliknya di antarmuka Remix:
+
+* **`verifikasiLokal()`**: Mengecek integritas blok suara terakhir di blockchain.
+* **`rekapitulasiBertingkat()`**: Mengubah status blok terakhir ke tahap rekapitulasi.
+* **`penghitunganAkhir()`**: Menyelesaikan proses hitung akhir dan mengubah status menjadi sah (`FINISHED`).
+* **`getBlockchainLength()`**: Melihat total jumlah blok yang sudah tercatat di blockchain.
+
+---
+
+### 💡 Tips Alur Pengujian di Remix IDE:
+
+1. Pastikan Anda menggunakan akun Ethereum pertama (sebagai `contractOwner` / Panitia).
+2. Panggil fungsi **`buatBatchSuara`** terlebih dahulu dengan mengisi data-data di atas.
+3. Setelah berhasil, jalankan **`verifikasiLokal`** $\rightarrow$ **`rekapitulasiBertingkat`** $\rightarrow$ **`penghitunganAkhir`** secara berurutan untuk mensimulasikan siklus hidup e-voting.
